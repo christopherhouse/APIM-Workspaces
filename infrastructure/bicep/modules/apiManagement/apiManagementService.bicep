@@ -13,7 +13,11 @@ param apimPublisherEmailAddress string
 @description('The number of capacity units to allocate to the API Management service')
 param apimCapacityUnits int = 1
 
+@description('The resource ID of the user-assigned managed identity to assign to the API Management service')
 param apimUserAssignedManagedIdentityResourceId string
+
+@description('The resource ID of the Log Analytics workspace to link to the API Management service')
+param logAnalyticsWorkspaceResourceId string
 
 resource apim 'Microsoft.ApiManagement/service@2024-05-01' = {
   name: apiManagementServiceName
@@ -45,5 +49,23 @@ resource apim 'Microsoft.ApiManagement/service@2024-05-01' = {
     }
     publisherEmail: apimPublisherEmailAddress
     publisherName: apimPublisherName
+  }
+}
+
+resource diag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'apim-diagnostics'
+  scope: apim
+  properties: {
+    logs: [
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
+      {
+        categoryGroup: 'audit'
+        enabled: true
+      }
+    ]
+    workspaceId: logAnalyticsWorkspaceResourceId
   }
 }
