@@ -12,12 +12,14 @@ $ErrorActionPreference = "Stop"
 
 $scriptPath = $PSScriptRoot
 
+Write-Output $scriptPath
+
 # Deploy the bicep template
 $deploymentName = [guid]::NewGuid().ToString().Substring(0,6)
 
 az deployment group create `
     --name $deploymentName `
     --resource-group $ResourceGroup `
-    --template-file "$scriptPath/../bicep/main.bicep" `
-    --parameters "@$scriptPath/../bicep/parameters/main.bicepparam" `
+    --template-file "$scriptPath\..\bicep/main.bicep" `
+    --parameters "$scriptPath\..\bicep/parameters/main.bicepparam" `
     --mode Incremental

@@ -20,7 +20,7 @@ var logAnalyticsWorkspaceDeploymentName = '${logAnalyticsWorkspaceName}${deploym
 
 var apimServiceName = 'apim${baseNameSuffix}'
 var apimServiceDeploymentName = '${apimServiceName}${deployment().name}'
-var apimUserAssignedManagedIdentityName = 'id${apimServiceName}'
+var apimUserAssignedManagedIdentityName = 'id-${apimServiceName}'
 var apimUserAssignedManagedIdentityDeploymentName = '${apimUserAssignedManagedIdentityName}${deployment().name}'
 
 module log './modules/observability/logAnalyticsWorkspace.bicep' = {

@@ -19,7 +19,7 @@ param apimUserAssignedManagedIdentityResourceId string
 @description('The resource ID of the Log Analytics workspace to link to the API Management service')
 param logAnalyticsWorkspaceResourceId string
 
-resource apim 'Microsoft.ApiManagement/service@2024-05-01' = {
+resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
   name: apiManagementServiceName
   location: location
   identity: {
@@ -34,7 +34,7 @@ resource apim 'Microsoft.ApiManagement/service@2024-05-01' = {
   }
   properties: {
     apiVersionConstraint: {
-      minApiVersion: '2021-08-21'
+      minApiVersion: '2021-08-01'
     }
     customProperties: {
       // Disable weak/insecure cipher suites
