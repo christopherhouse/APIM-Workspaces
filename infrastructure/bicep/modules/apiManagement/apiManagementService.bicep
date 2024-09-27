@@ -19,6 +19,18 @@ param apimUserAssignedManagedIdentityResourceId string
 @description('The resource ID of the Log Analytics workspace to link to the API Management service')
 param logAnalyticsWorkspaceResourceId string
 
+@description('The name of the workspace to create')
+param workspaceName string
+
+@description('The display name of the workspace')
+param workspaceDisplayName string
+
+@description('The description of the workspace')
+param workspaceDescription string
+
+@description('The name of the gateway to create')
+param gatewayName string
+
 resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
   name: apiManagementServiceName
   location: location
@@ -52,6 +64,37 @@ resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
   }
 }
 
+resource ws 'Microsoft.ApiManagement/service/workspaces@2023-09-01-preview' = {
+  name: workspaceName
+  parent: apim
+  properties: {
+    displayName: workspaceDisplayName
+    description: workspaceDescription
+  }
+}
+
+resource gw 'Microsoft.ApiManagement/gateways@2023-09-01-preview' = {
+  name: gatewayName
+  location: location
+  sku: {
+    name: 'WorkspaceGatewayPremium'
+    capacity: 1
+  }
+  properties: {
+    backend: {}
+    frontend: {}
+    virtualNetworkType: 'None'
+  }
+}
+
+resource gwConfig 'Microsoft.ApiManagement/gateways/configConnections@2023-09-01-preview' = {
+  name: '${gatewayName}${uniqueString(gatewayName)}'
+  parent: gw
+  properties: {
+    sourceId: ws.id
+  }
+}
+
 resource diag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'apim-diagnostics'
   scope: apim
@@ -69,3 +112,6 @@ resource diag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
     workspaceId: logAnalyticsWorkspaceResourceId
   }
 }
+
+output id string = apim.id
+output workspaceId string = ws.id
