@@ -22,6 +22,9 @@ param apimWorkspaceDisplayName string
 @description('The description of the workspace')
 param apimWorkspaceDescription string
 
+@description('A collection of tags to apply to the resources')
+param tags object = {}
+
 var baseNameSuffix = '-${workloadName}-${environmentSuffix}'
 
 var logAnalyticsWorkspaceName = 'log${baseNameSuffix}'
@@ -46,6 +49,7 @@ module kv './modules/keyVault/keyVault.bicep' = {
     keyVaultName: keyVaultName
     location: location
     logAnalyticsWorkspaceResourceId: log.outputs.id
+    tags: tags
   }
 }
 
@@ -54,6 +58,7 @@ module log './modules/observability/logAnalyticsWorkspace.bicep' = {
   params: {
     location: location
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
+    tags: tags
   }
 }
 
@@ -64,6 +69,7 @@ module appInsights './modules/observability/applicationInsights.bicep' = {
     applicationInsightsName: appInsightsName
     logAnalyticsWorkspaceResourceId: log.outputs.id
     keyVaultName: kv.outputs.name
+    tags: tags
   }
 }
 
@@ -72,6 +78,7 @@ module apimMi './modules/identity/userAssignedManagedIdentity.bicep' = {
   params: {
     location: location
     userAssignedManagedIdentityName: apimUserAssignedManagedIdentityName
+    tags: tags
   }
 }
 
@@ -99,6 +106,7 @@ module apim './modules/apiManagement/apiManagementService.bicep' = {
     apimCapacityUnits: 1
     appInsightsKeySecretUri: appInsights.outputs.instrumentationKeySecretUri
     appInsightsResourceId: appInsights.outputs.id
+    tags: tags
   }
   dependsOn: [
     // Setup a manual depdency since no natural depdency exists to ensure that the MI RBAC assignment

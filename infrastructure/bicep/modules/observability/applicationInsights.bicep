@@ -10,10 +10,14 @@ param logAnalyticsWorkspaceResourceId string
 @description('The name of the key vault to create a secret for the instrumentation key')
 param keyVaultName string
 
+@description('A collection of tags to apply to the resources')
+param tags object
+
 resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   name: applicationInsightsName
   location: location
   kind: 'web'
+  tags: tags
   properties: {
     Application_Type: 'web'
     Flow_Type: 'Bluefield'

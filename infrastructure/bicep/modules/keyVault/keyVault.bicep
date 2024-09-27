@@ -7,9 +7,13 @@ param location string
 @description('The resource ID of the Log Analytics workspace')
 param logAnalyticsWorkspaceResourceId string
 
+@description('A collection of tags to apply to the resources')
+param tags object
+
 resource kv 'Microsoft.KeyVault/vaults@2024-04-01-preview' = {
   name: keyVaultName
   location: location
+  tags: tags
   properties: {
     sku: {
       family: 'A'

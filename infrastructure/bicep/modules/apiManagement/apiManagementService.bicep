@@ -37,6 +37,9 @@ param appInsightsResourceId string
 @description('The URI of the secret in the key vault that contains the Application Insights instrumentation key')
 param appInsightsKeySecretUri string
 
+@description('A collection of tags to apply to the resources')
+param tags object
+
 resource mi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
   name: last(split(apimUserAssignedManagedIdentityResourceId, '/'))
   scope: resourceGroup()
@@ -45,6 +48,7 @@ resource mi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview
 resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
   name: apiManagementServiceName
   location: location
+  tags: tags
   identity: {
     type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: {
@@ -128,6 +132,7 @@ resource ws 'Microsoft.ApiManagement/service/workspaces@2023-09-01-preview' = {
 resource gw 'Microsoft.ApiManagement/gateways@2023-09-01-preview' = {
   name: gatewayName
   location: location
+  tags: tags
   sku: {
     name: 'WorkspaceGatewayPremium'
     capacity: 1
