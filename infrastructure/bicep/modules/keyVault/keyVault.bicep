@@ -40,3 +40,6 @@ resource diag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
     workspaceId: logAnalyticsWorkspaceResourceId
   }
 }
+
+output id string = kv.id
+output name string = kv.name
