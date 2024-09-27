@@ -31,6 +31,17 @@ param workspaceDescription string
 @description('The name of the gateway to create')
 param gatewayName string
 
+@description('The resource ID of the Application Insights resource to link to the API Management service')
+param appInsightsResourceId string
+
+@description('The URI of the secret in the key vault that contains the Application Insights instrumentation key')
+param appInsightsKeySecretUri string
+
+resource mi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' existing = {
+  name: last(split(apimUserAssignedManagedIdentityResourceId, '/'))
+  scope: resourceGroup()
+}
+
 resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
   name: apiManagementServiceName
   location: location
@@ -61,6 +72,47 @@ resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
     }
     publisherEmail: apimPublisherEmailAddress
     publisherName: apimPublisherName
+  }
+}
+
+resource appInsightsKeyNv 'Microsoft.ApiManagement/service/namedValues@2023-09-01-preview' = {
+  name: 'appInsightsKey'
+  parent: apim
+  properties: {
+    displayName: 'App Insights Instrumentation Key'
+    keyVault: {
+      identityClientId: mi.properties.principalId
+      secretIdentifier: appInsightsKeySecretUri
+    }
+    secret: true
+  }
+}
+
+resource aiLogger 'Microsoft.ApiManagement/service/loggers@2023-09-01-preview' = {
+  name: 'appInsightsLogger'
+  parent: apim
+  properties: {
+    loggerType: 'applicationInsights'
+    description: 'Application Insights Logger'
+    resourceId: appInsightsResourceId
+    isBuffered: true
+    credentials: {
+      instrumentationKey: '{{ ${appInsightsKeyNv.name} }}'
+    }
+  }
+}
+
+resource appInsightsDiags 'Microsoft.ApiManagement/service/diagnostics@2023-09-01-preview' = {
+  name: 'applicationInsights'
+  parent: apim
+  properties: {
+    alwaysLog: 'allErrors'
+    httpCorrelationProtocol: 'W3C'
+    loggerId: aiLogger.id
+    sampling: {
+      samplingType: 'fixed'
+      percentage: 100
+    }
   }
 }
 
