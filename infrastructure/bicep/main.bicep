@@ -97,6 +97,8 @@ module apim './modules/apiManagement/apiManagementService.bicep' = {
     workspaceDisplayName: apimWorkspaceDisplayName
     workspaceDescription: apimWorkspaceDescription
     apimCapacityUnits: 1
+    appInsightsKeySecretUri: appInsights.outputs.instrumentationKeySecretUri
+    appInsightsResourceId: appInsights.outputs.id
   }
   dependsOn: [
     // Setup a manual depdency since no natural depdency exists to ensure that the MI RBAC assignment
