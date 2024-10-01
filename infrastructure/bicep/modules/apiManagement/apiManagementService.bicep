@@ -80,12 +80,12 @@ resource apim 'Microsoft.ApiManagement/service@2023-09-01-preview' = {
 }
 
 resource appInsightsKeyNv 'Microsoft.ApiManagement/service/namedValues@2023-09-01-preview' = {
-  name: 'appInsightsKey'
+  name: 'appInsightsLoggerKey'
   parent: apim
   properties: {
-    displayName: 'App Insights Instrumentation Key'
+    displayName: 'appInsightsLoggerKey'
     keyVault: {
-      identityClientId: mi.properties.principalId
+      identityClientId: mi.properties.clientId
       secretIdentifier: appInsightsKeySecretUri
     }
     secret: true
@@ -97,7 +97,6 @@ resource aiLogger 'Microsoft.ApiManagement/service/loggers@2023-09-01-preview' =
   parent: apim
   properties: {
     loggerType: 'applicationInsights'
-    description: 'Application Insights Logger'
     resourceId: appInsightsResourceId
     isBuffered: true
     credentials: {
@@ -107,15 +106,48 @@ resource aiLogger 'Microsoft.ApiManagement/service/loggers@2023-09-01-preview' =
 }
 
 resource appInsightsDiags 'Microsoft.ApiManagement/service/diagnostics@2023-09-01-preview' = {
-  name: 'applicationInsights'
+  name: 'applicationinsights'
   parent: apim
   properties: {
     alwaysLog: 'allErrors'
     httpCorrelationProtocol: 'W3C'
     loggerId: aiLogger.id
+    logClientIp: true
     sampling: {
       samplingType: 'fixed'
       percentage: 100
+    }
+    frontend: {
+      request: {
+        headers: [
+        ]
+        body: {
+          bytes: 0
+        }
+      }
+      response: {
+        headers: [
+        ]
+        body: {
+          bytes: 0
+        }
+      }
+    }
+    backend: {
+      request: {
+        headers: [
+        ]
+        body: {
+          bytes: 0
+        }
+      }
+      response: {
+        headers: [
+        ]
+        body: {
+          bytes: 0
+        }
+      }
     }
   }
 }
@@ -130,7 +162,7 @@ resource ws 'Microsoft.ApiManagement/service/workspaces@2023-09-01-preview' = {
 }
 
 resource gw 'Microsoft.ApiManagement/gateways@2023-09-01-preview' = {
-  name: gatewayName
+  name: '${gatewayName}-2'
   location: location
   tags: tags
   sku: {
