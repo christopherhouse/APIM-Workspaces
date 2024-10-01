@@ -7,10 +7,17 @@ param location string
 @description('The resource ID of the Log Analytics workspace to link to the Application Insights resource')
 param logAnalyticsWorkspaceResourceId string
 
+@description('The name of the key vault to create a secret for the instrumentation key')
+param keyVaultName string
+
+@description('A collection of tags to apply to the resources')
+param tags object
+
 resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   name: applicationInsightsName
   location: location
   kind: 'web'
+  tags: tags
   properties: {
     Application_Type: 'web'
     Flow_Type: 'Bluefield'
@@ -19,4 +26,14 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   }
 }
 
+module secret '../keyVault/keyVaultSecret.bicep' = {
+  name : 'ikey-${deployment().name}'
+  params: {
+    keyVaultName: keyVaultName
+    secretName: 'appInsightsInstrumentationKey'
+    secretValue: appInsights.properties.InstrumentationKey
+  }
+}
+
 output id string = appInsights.id
+output instrumentationKeySecretUri string = secret.outputs.secretUri
