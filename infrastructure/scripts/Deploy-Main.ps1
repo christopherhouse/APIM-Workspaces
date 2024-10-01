@@ -8,11 +8,7 @@ param(
     [string]$ResourceGroup
 )
 
-$ErrorActionPreference = "Stop"
-
 $scriptPath = $PSScriptRoot
-
-Write-Output $scriptPath
 
 # Deploy the bicep template
 $deploymentName = [guid]::NewGuid().ToString().Substring(0,6)
